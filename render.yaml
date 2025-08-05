@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: vetformulab-backend
+    env: node
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+    disk:
+      name: vetformulab-data
+      mountPath: /opt/render/project/src/backend/data
+      sizeGB: 1
+    autoDeploy: true 
