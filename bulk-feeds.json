@@ -1,0 +1,272 @@
+[
+  {
+    "id": 34,
+    "name": "Science Diet Senior 7+ Small Bites",
+    "brand": "Science Diet",
+    "type": "повседневный",
+    "animal_type": "собака",
+    "life_stage": "пожилой",
+    "composition": {
+      "crude_protein": 19.4,
+      "crude_fat": 12.0,
+      "crude_fiber": 2.2,
+      "ash": 5.7,
+      "moisture": 10.0,
+      "nfe": 50.7,
+      "calcium": 0.76,
+      "phosphorus": 0.62,
+      "sodium": 0.31,
+      "potassium": 0.73,
+      "magnesium": 0.08,
+      "iron": 169.0,
+      "copper": 7.4,
+      "zinc": 155.0,
+      "manganese": 4.9,
+      "iodine": 1.4,
+      "selenium": 0.2
+    },
+    "vitamins": {
+      "vitamin_a": 21645,
+      "vitamin_d3": 730,
+      "vitamin_e": 550,
+      "vitamin_k": 0.8,
+      "vitamin_b1": 16.9,
+      "vitamin_b2": 19.1,
+      "vitamin_b6": 25.4,
+      "vitamin_b12": 0.07,
+      "niacin": 350.0,
+      "pantothenic_acid": 100.0,
+      "folic_acid": 7.0,
+      "biotin": 1.8,
+      "choline": 1300.0
+    },
+    "energy": {
+      "metabolizable_energy": 3730.0,
+      "digestible_energy": 4100.0,
+      "gross_energy": 4500.0
+    },
+    "feeding_guide": {
+      "weight_5kg": "70-90g",
+      "weight_10kg": "115-150g",
+      "weight_15kg": "155-200g",
+      "weight_20kg": "190-245g",
+      "weight_25kg": "220-285g"
+    }
+  },
+  {
+    "id": 35,
+    "name": "Wellness CORE Indoor Kitten",
+    "brand": "Wellness",
+    "type": "повседневный",
+    "animal_type": "кошка",
+    "life_stage": "котенок",
+    "composition": {
+      "crude_protein": 45.0,
+      "crude_fat": 18.0,
+      "crude_fiber": 3.5,
+      "ash": 8.5,
+      "moisture": 10.0,
+      "nfe": 15.0,
+      "calcium": 1.8,
+      "phosphorus": 1.4,
+      "sodium": 0.5,
+      "potassium": 0.8,
+      "magnesium": 0.12,
+      "iron": 300.0,
+      "copper": 18.0,
+      "zinc": 280.0,
+      "manganese": 48.0,
+      "iodine": 5.0,
+      "selenium": 0.7
+    },
+    "vitamins": {
+      "vitamin_a": 30000,
+      "vitamin_d3": 2000,
+      "vitamin_e": 300.0,
+      "vitamin_k": 2.0,
+      "vitamin_b1": 15.0,
+      "vitamin_b2": 20.0,
+      "vitamin_b6": 12.0,
+      "vitamin_b12": 0.15,
+      "niacin": 200.0,
+      "pantothenic_acid": 60.0,
+      "folic_acid": 8.0,
+      "biotin": 1.5,
+      "choline": 3000.0
+    },
+    "energy": {
+      "metabolizable_energy": 4200.0,
+      "digestible_energy": 4620.0,
+      "gross_energy": 5040.0
+    },
+    "feeding_guide": {
+      "weight_1kg": "35-50g",
+      "weight_2kg": "55-75g",
+      "weight_3kg": "70-95g",
+      "weight_4kg": "85-115g",
+      "weight_5kg": "100-135g"
+    }
+  },
+  {
+    "id": 36,
+    "name": "Wellness Complete Health Small Breed",
+    "brand": "Wellness",
+    "type": "повседневный",
+    "animal_type": "собака",
+    "life_stage": "взрослый",
+    "composition": {
+      "crude_protein": 28.0,
+      "crude_fat": 13.0,
+      "crude_fiber": 5.0,
+      "ash": 7.0,
+      "moisture": 10.0,
+      "nfe": 37.0,
+      "calcium": 1.4,
+      "phosphorus": 1.0,
+      "sodium": 0.25,
+      "potassium": 0.7,
+      "magnesium": 0.12,
+      "iron": 150.0,
+      "copper": 15.0,
+      "zinc": 150.0,
+      "manganese": 25.0,
+      "iodine": 1.5,
+      "selenium": 0.4
+    },
+    "vitamins": {
+      "vitamin_a": 15000,
+      "vitamin_d3": 2000,
+      "vitamin_e": 150.0,
+      "vitamin_k": 1.0,
+      "vitamin_b1": 2.25,
+      "vitamin_b2": 5.0,
+      "vitamin_b6": 2.5,
+      "vitamin_b12": 0.024,
+      "niacin": 30.0,
+      "pantothenic_acid": 12.0,
+      "folic_acid": 0.18,
+      "biotin": 0.13,
+      "choline": 1200.0
+    },
+    "energy": {
+      "metabolizable_energy": 3668.0,
+      "digestible_energy": 4035.0,
+      "gross_energy": 4400.0
+    },
+    "feeding_guide": {
+      "weight_2kg": "30-45g",
+      "weight_5kg": "60-85g",
+      "weight_9kg": "90-125g",
+      "weight_14kg": "125-170g",
+      "weight_18kg": "155-210g"
+    }
+  },
+  {
+    "id": 37,
+    "name": "Blue Wilderness Puppy Chicken",
+    "brand": "Blue Buffalo", 
+    "type": "повседневный",
+    "animal_type": "собака",
+    "life_stage": "щенок",
+    "composition": {
+      "crude_protein": 36.0,
+      "crude_fat": 16.0,
+      "crude_fiber": 5.0,
+      "ash": 8.0,
+      "moisture": 10.0,
+      "nfe": 25.0,
+      "calcium": 1.5,
+      "phosphorus": 1.0,
+      "sodium": 0.3,
+      "potassium": 0.7,
+      "magnesium": 0.12,
+      "iron": 150.0,
+      "copper": 12.0,
+      "zinc": 150.0,
+      "manganese": 25.0,
+      "iodine": 1.5,
+      "selenium": 0.4
+    },
+    "vitamins": {
+      "vitamin_a": 15000,
+      "vitamin_d3": 2000,
+      "vitamin_e": 150.0,
+      "vitamin_k": 1.0,
+      "vitamin_b1": 2.25,
+      "vitamin_b2": 5.0,
+      "vitamin_b6": 2.5,
+      "vitamin_b12": 0.024,
+      "niacin": 30.0,
+      "pantothenic_acid": 12.0,
+      "folic_acid": 0.18,
+      "biotin": 0.13,
+      "choline": 1200.0
+    },
+    "energy": {
+      "metabolizable_energy": 3969.0,
+      "digestible_energy": 4366.0,
+      "gross_energy": 4760.0
+    },
+    "feeding_guide": {
+      "weight_5kg": "95-125g",
+      "weight_10kg": "160-210g",
+      "weight_15kg": "215-280g",
+      "weight_20kg": "265-345g",
+      "weight_25kg": "310-405g"
+    }
+  },
+  {
+    "id": 38,
+    "name": "Meow Mix Original Choice",
+    "brand": "Meow Mix",
+    "type": "повседневный",
+    "animal_type": "кошка",
+    "life_stage": "взрослый",
+    "composition": {
+      "crude_protein": 28.0,
+      "crude_fat": 9.0,
+      "crude_fiber": 4.5,
+      "ash": 9.0,
+      "moisture": 12.0,
+      "nfe": 37.5,
+      "calcium": 1.0,
+      "phosphorus": 0.9,
+      "sodium": 1.5,
+      "potassium": 0.7,
+      "magnesium": 0.12,
+      "iron": 80.0,
+      "copper": 5.0,
+      "zinc": 120.0,
+      "manganese": 10.0,
+      "iodine": 1.5,
+      "selenium": 0.1
+    },
+    "vitamins": {
+      "vitamin_a": 15000,
+      "vitamin_d3": 1500,
+      "vitamin_e": 100.0,
+      "vitamin_k": 1.0,
+      "vitamin_b1": 15.0,
+      "vitamin_b2": 15.0,
+      "vitamin_b6": 15.0,
+      "vitamin_b12": 0.2,
+      "niacin": 60.0,
+      "pantothenic_acid": 15.0,
+      "folic_acid": 1.5,
+      "biotin": 0.15,
+      "choline": 2500.0
+    },
+    "energy": {
+      "metabolizable_energy": 3100.0,
+      "digestible_energy": 3410.0,
+      "gross_energy": 3720.0
+    },
+    "feeding_guide": {
+      "weight_2kg": "30-40g",
+      "weight_4kg": "50-70g",
+      "weight_6kg": "70-95g",
+      "weight_8kg": "90-125g",
+      "weight_10kg": "110-150g"
+    }
+  }
+] 
