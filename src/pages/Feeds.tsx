@@ -362,7 +362,7 @@ if (loading) {
           {/* Фильтры */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr',
+            gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr',
             gap: '15px'
           }}>
             <input
@@ -411,6 +411,23 @@ if (loading) {
               <option value="">Все животные</option>
               <option value="dog">🐕 Собаки</option>
               <option value="cat">🐱 Кошки</option>
+            </select>
+
+            <select
+              value={selectedFeedCategory}
+              onChange={(e) => setSelectedFeedCategory(e.target.value)}
+              style={modernSelectStyle}
+              onFocus={(e) => Object.assign(e.target.style, modernFocusStyle)}
+              onBlur={(e) => Object.assign(e.target.style, { borderColor: 'rgba(0, 200, 81, 0.2)', boxShadow: '0 3px 15px rgba(0, 200, 81, 0.08)', transform: 'none' })}
+            >
+              <option value="">Все категории корма</option>
+              {(
+                (uniqueFeedCategories && uniqueFeedCategories.length > 0)
+                  ? uniqueFeedCategories
+                  : ['полнорационный','дополнительный','терапевтический']
+              ).map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
             </select>
 
             <select
@@ -574,79 +591,7 @@ if (loading) {
         </div>
       </div>
 
-            {/* --- ФИЛЬТРЫ --- */}
-      <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '16px',
-        marginBottom: '24px',
-        justifyContent: 'center'
-      }}>
-        <div>
-          <label style={{ fontWeight: 600, color: '#2d3748', marginRight: 8 }}>Вид животного:</label>
-          <select value={selectedAnimalType} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedAnimalType(e.target.value)} style={{ padding: '8px', borderRadius: '8px' }}>
-            <option value="">Все</option>
-            <option value="dog">Собака</option>
-            <option value="cat">Кошка</option>
-          </select>
-        </div>
-
-        <div>
-          <label style={{ fontWeight: 600, color: '#2d3748', marginRight: 8 }}>Категория:</label>
-          <select value={selectedFeedCategory} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedFeedCategory(e.target.value)} style={{ padding: '8px', borderRadius: '8px' }}>
-            <option value="">Все категории</option>
-            {uniqueFeedCategories.map(c => (<option key={c} value={c}>{c}</option>))}
-          </select>
-        </div>
-
-        <div>
-          <label style={{ fontWeight: 600, color: '#2d3748', marginRight: 8 }}>Назначение:</label>
-          <select value={selectedCategory} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedCategory(e.target.value)} style={{ padding: '8px', borderRadius: '8px' }}>
-            <option value="">Все</option>
-            {uniquePurposes.map(p => (<option key={p} value={p}>{p}</option>))}
-          </select>
-        </div>
-
-        <div>
-          <label style={{ fontWeight: 600, color: '#2d3748', marginRight: 8 }}>Тип корма:</label>
-          <select value={selectedType} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedType(e.target.value)} style={{ padding: '8px', borderRadius: '8px' }}>
-            <option value="">Все</option>
-            {uniqueTypes.map(t => (<option key={t} value={t}>{t === 'dry' ? 'Сухой' : t === 'wet' ? 'Влажный' : t}</option>))}
-          </select>
-        </div>
-
-        <div>
-          <label style={{ fontWeight: 600, color: '#2d3748', marginRight: 8 }}>Бренд:</label>
-          <select value={selectedBrand} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedBrand(e.target.value)} style={{ padding: '8px', borderRadius: '8px' }}>
-            <option value="">Все</option>
-            {uniqueBrands.map(b => (<option key={b} value={b}>{b}</option>))}
-          </select>
-        </div>
-
-        <div>
-          <label style={{ fontWeight: 600, color: '#2d3748', display: 'block' }}>Белок, %</label>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <input type="number" step="0.1" value={proteinMin} onChange={(e) => setProteinMin(e.target.value === '' ? '' : parseFloat(e.target.value))} placeholder="от" style={{ padding: '8px', borderRadius: '8px', width: '80px' }} />
-            <input type="number" step="0.1" value={proteinMax} onChange={(e) => setProteinMax(e.target.value === '' ? '' : parseFloat(e.target.value))} placeholder="до" style={{ padding: '8px', borderRadius: '8px', width: '80px' }} />
-          </div>
-        </div>
-
-        <div>
-          <label style={{ fontWeight: 600, color: '#2d3748', display: 'block' }}>Жир, %</label>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <input type="number" step="0.1" value={fatMin} onChange={(e) => setFatMin(e.target.value === '' ? '' : parseFloat(e.target.value))} placeholder="от" style={{ padding: '8px', borderRadius: '8px', width: '80px' }} />
-            <input type="number" step="0.1" value={fatMax} onChange={(e) => setFatMax(e.target.value === '' ? '' : parseFloat(e.target.value))} placeholder="до" style={{ padding: '8px', borderRadius: '8px', width: '80px' }} />
-          </div>
-        </div>
-
-        <div>
-          <label style={{ fontWeight: 600, color: '#2d3748', display: 'block' }}>Клетчатка, %</label>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <input type="number" step="0.1" value={fiberMin} onChange={(e) => setFiberMin(e.target.value === '' ? '' : parseFloat(e.target.value))} placeholder="от" style={{ padding: '8px', borderRadius: '8px', width: '80px' }} />
-            <input type="number" step="0.1" value={fiberMax} onChange={(e) => setFiberMax(e.target.value === '' ? '' : parseFloat(e.target.value))} placeholder="до" style={{ padding: '8px', borderRadius: '8px', width: '80px' }} />
-          </div>
-        </div>
-      </div>
+            {/* Дополнительные фильтры убраны: всё в верхней панели */}
 
 
       {/* --- ТАБЛИЦА КОРМОВ --- */}
