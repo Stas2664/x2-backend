@@ -215,9 +215,22 @@ router.get('/detailed', (req, res) => {
         });
       }
 
+      const toFeedCategory = (row) => {
+        // Выводим человеко-понятную категорию корма:
+        // - терапевтический: диетические и контроль веса
+        // - дополнительный: лакомства/добавки (type = treats)
+        // - полнорационный: все остальные
+        const category = String(row.category || '').toLowerCase();
+        const type = String(row.type || '').toLowerCase();
+        if (['diet', 'weight_loss'].includes(category)) return 'терапевтический';
+        if (type === 'treats') return 'дополнительный';
+        return 'полнорационный';
+      };
+
       const feeds = rows.map(feed => ({
         ...feed,
-        feeding_guide: {}
+        feeding_guide: {},
+        feed_category: toFeedCategory(feed)
       }));
 
       console.log(`✅ Найдено кормов: ${feeds.length}`);
