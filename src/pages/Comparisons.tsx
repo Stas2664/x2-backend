@@ -550,8 +550,7 @@ const Comparisons: React.FC = () => {
               '0 4px 15px rgba(0, 200, 81, 0.3)' : 
               '0 2px 8px rgba(0, 0, 0, 0.1)'
           }}
-          onClick={() => setShowAnimalForm(!showAnimalForm)}
-          >
+          onClick={() => setShowAnimalForm(!showAnimalForm)}>
             <div style={{
               position: 'absolute',
               top: '2px',
@@ -612,8 +611,7 @@ const Comparisons: React.FC = () => {
                 onChange={e => setAnimalData({...animalData, species: e.target.value as any})}
                 style={modernSelectStyle}
                 onFocus={(e) => Object.assign(e.target.style, modernFocusStyle)}
-                onBlur={(e) => Object.assign(e.target.style, { borderColor: 'rgba(0, 200, 81, 0.2)', boxShadow: '0 3px 15px rgba(0, 200, 81, 0.08)', transform: 'none' })}
-              >
+                onBlur={(e) => Object.assign(e.target.style, { borderColor: 'rgba(0, 200, 81, 0.2)', boxShadow: '0 3px 15px rgba(0, 200, 81, 0.08)', transform: 'none' })}>
                 <option value="собака">🐕 Собака</option>
                 <option value="кошка">🐱 Кошка</option>
                 
@@ -626,8 +624,7 @@ const Comparisons: React.FC = () => {
                 onChange={e => setAnimalData({...animalData, gender: e.target.value as any})}
                 style={modernSelectStyle}
                 onFocus={(e) => Object.assign(e.target.style, modernFocusStyle)}
-                onBlur={(e) => Object.assign(e.target.style, { borderColor: 'rgba(0, 200, 81, 0.2)', boxShadow: '0 3px 15px rgba(0, 200, 81, 0.08)', transform: 'none' })}
-              >
+                onBlur={(e) => Object.assign(e.target.style, { borderColor: 'rgba(0, 200, 81, 0.2)', boxShadow: '0 3px 15px rgba(0, 200, 81, 0.08)', transform: 'none' })}>
                 <option value="самец">♂️ Самец</option>
                 <option value="самка">♀️ Самка</option>
               </select>
@@ -701,8 +698,7 @@ const Comparisons: React.FC = () => {
                 onChange={e => setAnimalData({...animalData, status: e.target.value})}
                 style={modernSelectStyle}
                 onFocus={(e) => Object.assign(e.target.style, modernFocusStyle)}
-                onBlur={(e) => Object.assign(e.target.style, { borderColor: 'rgba(0, 200, 81, 0.2)', boxShadow: '0 3px 15px rgba(0, 200, 81, 0.08)', transform: 'none' })}
-              >
+                onBlur={(e) => Object.assign(e.target.style, { borderColor: 'rgba(0, 200, 81, 0.2)', boxShadow: '0 3px 15px rgba(0, 200, 81, 0.08)', transform: 'none' })}>
                 <option value="кастрированный">✂️ Кастрированный</option>
                 <option value="интактный">🔸 Интактный</option>
                 <option value="беременность 1-4 недели">🤱 Беременность 1-4 недели</option>
@@ -717,8 +713,7 @@ const Comparisons: React.FC = () => {
                 onChange={e => setAnimalData({...animalData, activity: e.target.value})}
                 style={modernSelectStyle}
                 onFocus={(e) => Object.assign(e.target.style, modernFocusStyle)}
-                onBlur={(e) => Object.assign(e.target.style, { borderColor: 'rgba(0, 200, 81, 0.2)', boxShadow: '0 3px 15px rgba(0, 200, 81, 0.08)', transform: 'none' })}
-              >
+                onBlur={(e) => Object.assign(e.target.style, { borderColor: 'rgba(0, 200, 81, 0.2)', boxShadow: '0 3px 15px rgba(0, 200, 81, 0.08)', transform: 'none' })}>
                 <option value="склонность к ожирению">😴 Склонность к ожирению</option>
                 <option value="нормальная активность">🚶 Нормальная активность</option>
                 <option value="высокая активность">🏃 Высокая активность</option>
@@ -866,8 +861,7 @@ const Comparisons: React.FC = () => {
                 fontWeight: '600',
                 padding: '8px 16px',
                 cursor: 'pointer'
-              }}
-            >
+              }}>
               🔄 Выбрать другие корма
             </button>
           </div>
@@ -947,8 +941,7 @@ const Comparisons: React.FC = () => {
                       e.currentTarget.style.background = 'rgba(255, 255, 255, 0.5)';
                       e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.1)';
                     }
-                  }}
-                >
+                  }}>
                   <input
                     type="checkbox"
                     checked={compareFields.includes(field.key)}
@@ -1027,8 +1020,7 @@ const Comparisons: React.FC = () => {
                     e.currentTarget.style.transform = 'translateY(0)';
                     e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
                   }
-                }}
-              >
+                }}>
                 📋 Как в базе
               </button>
               <button 
@@ -1060,8 +1052,7 @@ const Comparisons: React.FC = () => {
                     e.currentTarget.style.transform = 'translateY(0)';
                     e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
                   }
-                }}
-              >
+                }}>
                 🔥 На 1000 ккал
               </button>
               <button 
@@ -1093,8 +1084,7 @@ const Comparisons: React.FC = () => {
                     e.currentTarget.style.transform = 'translateY(0)';
                     e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
                   }
-                }}
-              >
+                }}>
                 💧 На 100г сух. в-ва
               </button>
             </div>
@@ -1416,8 +1406,7 @@ let displayValue = value;
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)';
               e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 200, 81, 0.3)';
-            }}
-          >
+            }}>
             🍖 Перейти к выбору кормов
           </button>
         </div>
