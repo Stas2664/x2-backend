@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "name": "vetformulab-frontend",
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "headers": {
+        "cache-control": "s-maxage=31536000,immutable"
+      }
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "REACT_APP_API_URL": "https://https://x2-backend-j0jk.onrender.com"
+  },
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "framework": "create-react-app"
+}

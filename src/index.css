@@ -1,0 +1,551 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* 🎨 СОВРЕМЕННАЯ ПАЛИТРА - Более насыщенная и контрастная */
+  --primary-gradient: linear-gradient(135deg, #00C851 0%, #007E33 100%);
+  --secondary-gradient: linear-gradient(135deg, #33B5E5 0%, #0099CC 100%);
+  --accent-gradient: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+  --warm-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --bg-gradient: linear-gradient(135deg, #e8f8f5 0%, #d1f2eb 100%);
+  --hero-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  
+  /* 🎯 ОСНОВНЫЕ ЦВЕТА - Более яркие и контрастные */
+  --primary-green: #00C851;    /* Насыщенный зеленый */
+  --primary-green-dark: #007E33; /* Темный зеленый */
+  --secondary-green: #8BC34A;  /* Вторичный зеленый */
+  --secondary-blue: #33B5E5;   /* Голубой акцент */
+  --secondary-blue-dark: #0099CC; /* Темный голубой */
+  --accent-orange: #FF6B35;    /* Яркий оранжевый */
+  --accent-orange-dark: #F7931E; /* Темный оранжевый */
+  --warm-brown: #8D6E63;
+  --light-green: #B8E6B8;
+  --dark-green: #004D20;
+  
+  /* 📝 ТИПОГРАФИКА - Темнее и контрастнее */
+  --text-primary: #1a1a1a;      /* Почти черный */
+  --text-secondary: #333333;    /* Темно-серый */
+  --text-light: #666666;       /* Средний серый */
+  --text-muted: #999999;       /* Светло-серый */
+  --bg-white: rgba(255, 255, 255, 0.98);
+  --shadow: 0 10px 40px rgba(0, 200, 81, 0.15);
+  --shadow-hover: 0 20px 60px rgba(0, 200, 81, 0.25);
+  
+  /* Фоновые градиенты */
+  --bg-light: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  --bg-dark: linear-gradient(135deg, #232526 0%, #414345 100%);
+  
+  /* Тени */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+  --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.25);
+  
+  /* Цвета */
+  --text-dark: #1a202c;
+  --text-light: #a0aec0;
+}
+
+body {
+  font-family: 'Inter', 'Poppins', 'Segoe UI', 'Roboto', sans-serif;
+  background: var(--bg-gradient);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+/* 🎨 СОВРЕМЕННАЯ ТИПОГРАФИКА */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', 'Inter', sans-serif;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+  margin-bottom: 0.5em;
+}
+
+h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+h3 {
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+p {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+/* ЗАГРУЗОЧНАЯ ЗАСТАВКА */
+.loading-splash {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-gradient);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeOut 2s ease-in-out 3s forwards;
+}
+
+.logo-animation {
+  font-size: 4rem;
+  animation: bounce 2s ease-in-out infinite;
+  margin-bottom: 2rem;
+}
+
+.loading-text {
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+  text-align: center;
+  margin-bottom: 2rem;
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+.loading-bar {
+  width: 300px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.loading-progress {
+  height: 100%;
+  background: linear-gradient(90deg, #fff, #ffd700, #fff);
+  border-radius: 10px;
+  animation: loading 3s ease-in-out forwards;
+}
+
+/* 🚀 СОВРЕМЕННЫЕ КНОПКИ МИРОВОГО УРОВНЯ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: 'Poppins', 'Inter', sans-serif;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+  min-width: 140px;
+  min-height: 48px;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s ease;
+}
+
+.btn:hover::before {
+  left: 100%;
+}
+
+.btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* 🎯 ОСНОВНАЯ КНОПКА */
+.btn-primary {
+  background: var(--primary-gradient);
+  color: white;
+  box-shadow: 0 8px 25px rgba(0, 200, 81, 0.4);
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 15px 40px rgba(0, 200, 81, 0.5);
+}
+
+/* 💙 ВТОРИЧНАЯ КНОПКА */
+.btn-secondary {
+  background: var(--secondary-gradient);
+  color: white;
+  box-shadow: 0 8px 25px rgba(51, 181, 229, 0.4);
+}
+
+.btn-secondary:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 15px 40px rgba(51, 181, 229, 0.5);
+}
+
+/* 🧡 АКЦЕНТНАЯ КНОПКА */
+.btn-accent {
+  background: var(--accent-gradient);
+  color: white;
+  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+}
+
+.btn-accent:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 15px 40px rgba(255, 107, 53, 0.5);
+}
+
+/* 👑 ГЕРОИЧЕСКАЯ КНОПКА */
+.btn-hero {
+  padding: 1.5rem 3rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  border-radius: 20px;
+  background: var(--hero-gradient);
+  color: white;
+  letter-spacing: 1px;
+  box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+  min-height: 60px;
+}
+
+.btn-hero:hover {
+  transform: translateY(-4px) scale(1.08);
+  box-shadow: 0 25px 50px rgba(102, 126, 234, 0.6);
+}
+
+/* 🏥 ВЕТЕРИНАРНАЯ КНОПКА */
+.btn-vet {
+  background: linear-gradient(135deg, #00C851 0%, #33B5E5 100%);
+  color: white;
+  box-shadow: 0 8px 25px rgba(0, 200, 81, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-vet:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 15px 40px rgba(0, 200, 81, 0.5);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* КАРТОЧКИ ПРЕМИУМ УРОВНЯ */
+.card {
+  background: var(--bg-white);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(76, 175, 80, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--primary-gradient);
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-hover);
+}
+
+.card-premium {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+  border: 2px solid rgba(102, 126, 234, 0.2);
+}
+
+.card-hero {
+  background: var(--primary-gradient);
+  color: white;
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+/* НАВИГАЦИЯ МИРОВОГО УРОВНЯ */
+.sidebar {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(102, 126, 234, 0.1);
+  box-shadow: var(--shadow-xl);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  margin: 0.5rem 1rem;
+  border-radius: 12px;
+  color: var(--text-dark);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.nav-item:hover {
+  background: var(--primary-gradient);
+  color: white;
+  transform: translateX(5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.nav-item.active {
+  background: var(--primary-gradient);
+  color: white;
+  box-shadow: var(--shadow-lg);
+}
+
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  right: -1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 30px;
+  background: var(--secondary-gradient);
+  border-radius: 2px;
+}
+
+/* АНИМАЦИИ */
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; pointer-events: none; }
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% { transform: translateY(0); }
+  40%, 43% { transform: translateY(-15px); }
+  70% { transform: translateY(-8px); }
+  90% { transform: translateY(-3px); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(76, 175, 80, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(76, 175, 80, 0.6); }
+}
+
+@keyframes loading {
+  0% { width: 0%; }
+  50% { width: 70%; }
+  100% { width: 100%; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(50px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes paw-bounce {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.1) rotate(5deg); }
+}
+
+/* 🎭 ДОПОЛНИТЕЛЬНЫЕ ЖИВЫЕ АНИМАЦИИ */
+@keyframes wiggle {
+  0%, 7% { transform: rotateZ(0deg); }
+  15% { transform: rotateZ(-15deg); }
+  20% { transform: rotateZ(10deg); }
+  25% { transform: rotateZ(-10deg); }
+  30% { transform: rotateZ(6deg); }
+  35% { transform: rotateZ(-4deg); }
+  40%, 100% { transform: rotateZ(0deg); }
+}
+
+@keyframes heart-beat {
+  0% { transform: scale(1); }
+  14% { transform: scale(1.2); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.2); }
+  70% { transform: scale(1); }
+}
+
+@keyframes shine {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes zoom-in {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slide-in-left {
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* 🐾 СПЕЦИАЛЬНЫЕ ВЕТЕРИНАРНЫЕ АНИМАЦИИ */
+@keyframes tail-wag {
+  0%, 100% { transform: rotate(-10deg); }
+  50% { transform: rotate(10deg); }
+}
+
+@keyframes nose-twitch {
+  0%, 90%, 100% { transform: scale(1); }
+  5%, 15% { transform: scale(1.1); }
+}
+
+@keyframes ear-flick {
+  0%, 95%, 100% { transform: translateY(0) rotate(0deg); }
+  5% { transform: translateY(-2px) rotate(5deg); }
+  15% { transform: translateY(0) rotate(-3deg); }
+}
+
+/* 📱 АДАПТИВНЫЕ УТИЛИТЫ */
+@media (max-width: 768px) {
+  h1 { font-size: 2.5rem; }
+  h2 { font-size: 2rem; }
+  h3 { font-size: 1.5rem; }
+  
+  .btn {
+    min-width: 120px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .btn-hero {
+    padding: 1.25rem 2.5rem;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.75rem; }
+  
+  .btn {
+    min-width: 100px;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* 📱 МОБИЛЬНАЯ НАВИГАЦИЯ */
+@media (max-width: 768px) {
+  .mobile-menu-toggle {
+    display: flex !important;
+  }
+  .desktop-nav {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-menu-toggle {
+    display: none !important;
+  }
+}
+
+/* УТИЛИТЫ */
+.animate-slideUp { animation: slideUp 0.6s ease-out; }
+.animate-fadeIn { animation: fadeIn 0.8s ease-out; }
+.animate-pulse { animation: pulse 2s infinite; }
+.animate-float { animation: float 3s ease-in-out infinite; }
+
+.text-gradient {
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bg-gradient { background: var(--primary-gradient); }
+.bg-gradient-light { background: var(--bg-light); }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .loading-text { font-size: 1.5rem; }
+  .loading-bar { width: 250px; }
+  .btn-hero { padding: 1rem 2rem; font-size: 1rem; }
+  .card { padding: 1.5rem; }
+}
+
+/* Специальные эффекты для животных */
+.animal-icon {
+  animation: paw-bounce 2s ease-in-out infinite;
+}
+
+.paw-print {
+  position: relative;
+}
+
+.paw-print::before {
+  content: '🐾';
+  position: absolute;
+  font-size: 20px;
+  opacity: 0.1;
+  top: -10px;
+  right: -10px;
+  animation: float 3s ease-in-out infinite;
+}
