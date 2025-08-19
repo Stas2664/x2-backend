@@ -314,3 +314,4 @@ class GoogleSheetsService {
 }
 
 module.exports = new GoogleSheetsService();
+

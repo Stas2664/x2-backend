@@ -167,3 +167,4 @@ npm install googleapis google-auth-library
 2. Убедитесь в правильности настройки Google Cloud
 3. Проверьте доступность Google Sheets API
 4. Обратитесь к документации Google Sheets API
+

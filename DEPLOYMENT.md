@@ -143,3 +143,4 @@ curl -X POST https://your-app-name.onrender.com/api/sync/feeds \
 2. Убедитесь в правильности переменных окружения
 3. Проверьте доступность Google Sheets API
 4. Обратитесь к документации Render
+
