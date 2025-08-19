@@ -6,7 +6,10 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "test-sheets": "node test-google-sheets.js",
+    "sync-feeds": "node sync-feeds.js",
+    "check-security": "node check-security.js"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -15,7 +18,10 @@
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
     "express": "^4.19.2",
+    "googleapis": "^128.0.0",
+    "google-auth-library": "^9.0.0",
     "jsonwebtoken": "^9.0.2",
     "sqlite3": "^5.1.7"
   },

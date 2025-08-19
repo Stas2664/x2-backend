@@ -1,3 +1,6 @@
+// Загружаем переменные окружения
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -10,6 +13,7 @@ const animalsRouter = require('./routes/animals');
 const feedsRouter = require('./routes/feeds');
 const calculationsRouter = require('./routes/calculations');
 const { router: authRouter } = require('./routes/auth');
+const syncRouter = require('./routes/sync');
 
 const app = express();
 
@@ -84,6 +88,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/animals', animalsRouter);
 app.use('/api/feeds', feedsRouter);
 app.use('/api/calculations', calculationsRouter);
+app.use('/api/sync', syncRouter);
 
 // API информация на главной странице
 app.get('/', (req, res) => {
@@ -98,7 +103,8 @@ app.get('/', (req, res) => {
       auth: '/api/auth',
       animals: '/api/animals',
       feeds: '/api/feeds',
-      calculations: '/api/calculations'
+      calculations: '/api/calculations',
+      sync: '/api/sync'
     },
     cors: {
       enabled: true,
@@ -113,7 +119,7 @@ app.get('*', (req, res) => {
   if (req.path.startsWith('/api/')) {
     res.status(404).json({ 
       error: 'API endpoint not found', 
-      available_endpoints: ['/api/health', '/api/auth', '/api/animals', '/api/feeds', '/api/calculations']
+      available_endpoints: ['/api/health', '/api/auth', '/api/animals', '/api/feeds', '/api/calculations', '/api/sync']
     });
   } else {
     res.status(404).json({ 
@@ -149,168 +155,133 @@ initDatabase().then(() => {
   const sheetUrl = process.env.GOOGLE_SHEETS_URL;
   if (sheetUrl) {
     console.log('🟢 Найдена переменная GOOGLE_SHEETS_URL — запущу автоимпорт корма из Google Sheets');
-
-    const fetchCSV = (csvUrl) => new Promise((resolve, reject) => {
-      https.get(csvUrl, (resp) => {
-        if (resp.statusCode && resp.statusCode >= 300 && resp.statusCode < 400 && resp.headers.location) {
-          return resolve(fetchCSV(resp.headers.location));
-        }
-        let data = '';
-        resp.on('data', (chunk) => (data += chunk));
-        resp.on('end', () => resolve(data));
-      }).on('error', reject);
-    });
-
-    const parseCSV = (text) => {
-      const rows = [];
-      let i = 0, field = '', row = [], inQuotes = false;
-      while (i < text.length) {
-        const c = text[i];
-        if (inQuotes) {
-          if (c === '"') {
-            if (text[i + 1] === '"') { field += '"'; i++; } else { inQuotes = false; }
-          } else { field += c; }
-        } else {
-          if (c === '"') { inQuotes = true; }
-          else if (c === ',') { row.push(field); field = ''; }
-          else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
-          else if (c === '\r') { /* skip */ }
-          else { field += c; }
-        }
-        i++;
-      }
-      if (field.length || row.length) { row.push(field); rows.push(row); }
-      return rows;
-    };
-
-    const toNumber = (v) => {
-      if (v === undefined || v === null) return 0;
-      if (typeof v === 'number') return v;
-      const s = String(v).replace(/[^0-9,\.\-]/g, '').replace(',', '.');
-      const n = parseFloat(s);
-      return Number.isFinite(n) ? n : 0;
-    };
-
-    const mapType = (v) => {
-      const s = String(v || '').toLowerCase();
-      if (s.includes('сух')) return 'dry';
-      if (s.includes('влаж')) return 'wet';
-      if (s.includes('лаком') || s.includes('дополн') || s.includes('treat')) return 'treats';
-      return 'dry';
-    };
-
-    const mapAnimal = (v) => {
-      const s = String(v || '').toLowerCase();
-      if (s.includes('кош')) return 'cat';
-      if (s.includes('соб')) return 'dog';
-      if (s.includes('both') || s.includes('оба')) return 'both';
-      return 'dog';
-    };
-
-    const normalizeCaP = (value, header) => {
-      const n = toNumber(value);
-      const h = String(header || '').toLowerCase();
-      if (h.includes('мг') || n > 10) return n; // уже мг/100г
-      return Math.round(n * 1000); // % -> мг/100г
-    };
-
-    const run = async () => {
+    
+    // Импортируем сервис Google Sheets
+    const googleSheetsService = require('./services/googleSheets');
+    
+    const runAutoImport = async () => {
       try {
-        let exportUrl = sheetUrl;
-        if (exportUrl.includes('/edit')) {
-          exportUrl = exportUrl.split('/edit')[0] + '/export?format=csv';
-        } else if (!exportUrl.includes('/export')) {
-          exportUrl = exportUrl + (exportUrl.includes('?') ? '&' : '?') + 'export=download&format=csv';
+        // Инициализируем сервис
+        const initialized = await googleSheetsService.initialize();
+        if (!initialized) {
+          console.log('⚠️ Google Sheets сервис не инициализирован — пропускаю автоимпорт');
+          return;
         }
-        const csv = await fetchCSV(exportUrl);
-        const rows = parseCSV(csv);
-        if (!rows.length) return console.warn('⚠️ Google Sheets: пустой лист');
-        const headers = rows[0].map((h) => String(h || '').trim());
-        const getIndex = (...aliases) => headers.findIndex((h) => {
-          const low = h.toLowerCase();
-          return aliases.some((a) => low.includes(a));
-        });
 
-        const idx = {
-          name: getIndex('назв', 'name'),
-          brand: getIndex('бренд', 'торгов'),
-          type: getIndex('тип'),
-          animal: getIndex('собак', 'кош', 'вид живот'),
-          category: getIndex('категор', 'назначен', 'возраст'),
-          me: getIndex('мэ', 'ккал/кг', 'энерг'),
-          protein: getIndex('белок'),
-          fat: getIndex('жир'),
-          fiber: getIndex('клетчат'),
-          ash: getIndex('зола'),
-          moisture: getIndex('влага', 'влажн'),
-          calcium: getIndex('кальц'),
-          phosphorus: getIndex('фосфор'),
-          vitamin_a: getIndex('витамин а', 'vitamin a'),
-          vitamin_d3: getIndex('витамин d', 'vitamin d'),
-          ingredients: getIndex('ингредиент', 'состав')
-        };
+        // Получаем данные
+        const feedsData = await googleSheetsService.getFeedsData();
+        if (feedsData.length === 0) {
+          console.log('⚠️ Google Sheets: нет данных для импорта');
+          return;
+        }
+
+        console.log(`📊 Получено ${feedsData.length} кормов из Google Sheets`);
 
         const db = getDatabase();
         const clearOnImport = process.env.CLEAR_FEEDS_ON_IMPORT === '1';
+        
         db.serialize(() => {
           if (clearOnImport) {
-            db.run('DELETE FROM feeds');
+            db.run('DELETE FROM feeds WHERE user_id IS NULL', (err) => {
+              if (err) {
+                console.error('❌ Ошибка при очистке старых кормов:', err);
+                return;
+              }
+              console.log('🗑️ Старые публичные корма удалены');
+            });
           }
+
           const stmt = db.prepare(`
-            INSERT INTO feeds (name, brand, type, animal_type, category, metabolic_energy, protein, fat, carbohydrates, fiber, ash, moisture, calcium, phosphorus, vitamin_a, vitamin_d, ingredients)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO feeds (
+              user_id, name, brand, type, animal_type, category, metabolic_energy, 
+              protein, fat, carbohydrates, fiber, ash, moisture, calcium, phosphorus,
+              sodium, potassium, magnesium, iron, zinc, copper, manganese, selenium, iodine,
+              vitamin_a, vitamin_d, vitamin_e, vitamin_k, vitamin_b1, vitamin_b2, vitamin_b3,
+              vitamin_b5, vitamin_b6, vitamin_b7, vitamin_b9, vitamin_b12, vitamin_c,
+              ingredients, notes, price_per_kg, is_available, is_public, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `);
+
           let imported = 0;
-          for (let r = 1; r < rows.length; r++) {
-            const row = rows[r];
-            if (!row || row.length === 0) continue;
-            const name = row[idx.name] || '';
-            const brand = row[idx.brand] || '';
-            if (!String(name).trim()) continue;
-            const type = mapType(row[idx.type]);
-            const animal_type = mapAnimal(row[idx.animal]);
-            const categoryRaw = String(row[idx.category] || '').toLowerCase();
-            let category = 'adult';
-            if (categoryRaw.includes('щен') || categoryRaw.includes('котен')) category = 'puppy';
-            else if (categoryRaw.includes('пожил') || categoryRaw.includes('senior')) category = 'senior';
-            else if (categoryRaw.includes('вес') || categoryRaw.includes('похуд') || categoryRaw.includes('weight')) category = 'weight_loss';
-            else if (categoryRaw.includes('диет') || categoryRaw.includes('therap')) category = 'diet';
+          let errors = 0;
 
-            const me = toNumber(row[idx.me]);
-            const protein = toNumber(row[idx.protein]);
-            const fat = toNumber(row[idx.fat]);
-            const fiber = toNumber(row[idx.fiber]);
-            const ash = toNumber(row[idx.ash]);
-            const moisture = toNumber(row[idx.moisture]);
-            let carbohydrates = 0;
-            if (protein || fat || fiber || ash || moisture) {
-              carbohydrates = Math.max(0, 100 - (protein + fat + fiber + ash + moisture));
-            }
-            const calcium = normalizeCaP(row[idx.calcium], headers[idx.calcium]);
-            const phosphorus = normalizeCaP(row[idx.phosphorus], headers[idx.phosphorus]);
-            const vitamin_a = toNumber(row[idx.vitamin_a]);
-            const vitamin_d = toNumber(row[idx.vitamin_d3]);
-            const ingredients = String(row[idx.ingredients] || '');
+          feedsData.forEach((feed) => {
+            const values = [
+              null, // user_id (NULL для публичных кормов)
+              feed.name,
+              feed.brand,
+              feed.type,
+              feed.animal_type,
+              feed.category,
+              feed.metabolic_energy,
+              feed.protein,
+              feed.fat,
+              feed.carbohydrates,
+              feed.fiber,
+              feed.ash,
+              feed.moisture,
+              feed.calcium,
+              feed.phosphorus,
+              feed.sodium,
+              feed.potassium,
+              feed.magnesium,
+              feed.iron,
+              feed.zinc,
+              feed.copper,
+              feed.manganese,
+              feed.selenium,
+              feed.iodine,
+              feed.vitamin_a,
+              feed.vitamin_d,
+              feed.vitamin_e,
+              feed.vitamin_k,
+              feed.vitamin_b1,
+              feed.vitamin_b2,
+              feed.vitamin_b3,
+              feed.vitamin_b5,
+              feed.vitamin_b6,
+              feed.vitamin_b7,
+              feed.vitamin_b9,
+              feed.vitamin_b12,
+              feed.vitamin_c,
+              feed.ingredients,
+              feed.notes,
+              feed.price_per_kg,
+              feed.is_available ? 1 : 0,
+              feed.is_public ? 1 : 0,
+              new Date().toISOString(),
+              new Date().toISOString()
+            ];
 
-            stmt.run([
-              String(name).trim(), String(brand).trim(), type, animal_type, category,
-              me, protein, fat, carbohydrates, fiber, ash, moisture, calcium, phosphorus,
-              vitamin_a, vitamin_d, ingredients
-            ]);
-            imported++;
-          }
-          stmt.finalize((err) => {
-            if (err) return console.error('❌ Ошибка завершения импорта из Google:', err);
-            console.log(`✅ Импорт из Google Sheets завершён: ${imported} записей`);
+            stmt.run(values, function(err) {
+              if (err) {
+                console.error(`❌ Ошибка при вставке корма ${feed.name}:`, err);
+                errors++;
+              } else {
+                imported++;
+                console.log(`✅ Импортирован корм: ${feed.name} (${feed.brand})`);
+              }
+
+              if (imported + errors === feedsData.length) {
+                stmt.finalize((finalizeErr) => {
+                  if (finalizeErr) {
+                    console.error('❌ Ошибка завершения автоимпорта:', finalizeErr);
+                  } else {
+                    console.log(`✅ Автоимпорт из Google Sheets завершён: ${imported} кормов импортировано, ${errors} ошибок`);
+                  }
+                });
+              }
+            });
           });
         });
-      } catch (e) {
-        console.error('❌ Не удалось выполнить автоимпорт из Google Sheets:', e.message);
+
+      } catch (error) {
+        console.error('❌ Ошибка автоимпорта из Google Sheets:', error.message);
       }
     };
 
     // Старт через короткую задержку, чтобы сервер поднялся
-    setTimeout(run, 1500);
+    setTimeout(runAutoImport, 1500);
   } else {
     console.log('ℹ️ Переменная GOOGLE_SHEETS_URL не указана — автоимпорт кормов отключен');
   }
