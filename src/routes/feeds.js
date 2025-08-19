@@ -149,7 +149,7 @@ router.get('/', (req, res) => {
 router.get('/brands', (req, res) => {
   const db = getDatabase();
   
-  db.all('SELECT DISTINCT brand FROM feeds WHERE brand IS NOT NULL ORDER BY brand', (err, rows) => {
+  db.all("SELECT DISTINCT brand FROM feeds WHERE brand IS NOT NULL AND TRIM(brand) <> '' ORDER BY brand", (err, rows) => {
     if (err) {
       console.error('Ошибка получения брендов:', err);
       res.status(500).json({ error: 'Ошибка сервера' });
@@ -456,7 +456,7 @@ router.get('/stats/overview', (req, res) => {
   
   const queries = [
     'SELECT COUNT(*) as total_feeds FROM feeds',
-    'SELECT COUNT(DISTINCT brand) as total_brands FROM feeds WHERE brand IS NOT NULL',
+    "SELECT COUNT(DISTINCT brand) as total_brands FROM feeds WHERE brand IS NOT NULL AND TRIM(brand) <> ''",
     'SELECT type, COUNT(*) as count FROM feeds WHERE type IS NOT NULL GROUP BY type',
     'SELECT AVG(metabolic_energy) as avg_calories FROM feeds'
   ];
