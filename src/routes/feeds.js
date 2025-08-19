@@ -3,6 +3,7 @@ const router = express.Router();
 const { getDatabase } = require('../database');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
 
 // Создаем расширенную таблицу кормов если её нет при запуске
 const initDatabase = () => {
@@ -575,6 +576,340 @@ router.post('/import', (req, res) => {
       success: false,
       error: 'Failed to import feeds data'
     });
+  }
+});
+
+// Локальный импорт CSV с пути на диске
+// POST /feeds/import/local-csv { filePath: 'C:\\path\\to\\file.csv' }
+router.post('/import/local-csv', (req, res) => {
+  ensureDbInitialized();
+  try {
+    const { filePath } = req.body || {};
+    if (!filePath || !fs.existsSync(filePath)) {
+      return res.status(400).json({ success: false, error: 'CSV filePath is missing or not found' });
+    }
+
+    const csv = fs.readFileSync(filePath, 'utf8');
+
+    const parseCSV = (text) => {
+      const rows = [];
+      let i = 0, field = '', row = [], inQuotes = false;
+      while (i < text.length) {
+        const c = text[i];
+        if (inQuotes) {
+          if (c === '"') { if (text[i+1] === '"') { field += '"'; i++; } else { inQuotes = false; } }
+          else { field += c; }
+        } else {
+          if (c === '"') { inQuotes = true; }
+          else if (c === ',') { row.push(field); field = ''; }
+          else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+          else if (c === '\r') { /* skip */ }
+          else { field += c; }
+        }
+        i++;
+      }
+      if (field.length || row.length) { row.push(field); rows.push(row); }
+      return rows;
+    };
+
+    const toNumber = (v) => {
+      if (v === undefined || v === null) return 0;
+      if (typeof v === 'number') return v;
+      const s = String(v).replace(/[^0-9,\.\-]/g, '').replace(',', '.');
+      const n = parseFloat(s);
+      return Number.isFinite(n) ? n : 0;
+    };
+
+    const mapType = (v) => {
+      const s = String(v || '').toLowerCase();
+      if (s.includes('сух')) return 'dry';
+      if (s.includes('влаж')) return 'wet';
+      if (s.includes('лаком') || s.includes('дополн') || s.includes('treat')) return 'treats';
+      return 'dry';
+    };
+
+    const mapAnimal = (v) => {
+      const s = String(v || '').toLowerCase();
+      if (s.includes('кош')) return 'cat';
+      if (s.includes('соб')) return 'dog';
+      if (s.includes('both') || s.includes('оба')) return 'both';
+      return 'dog';
+    };
+
+    const normalizeCaP = (value, header) => {
+      const n = toNumber(value);
+      const h = String(header || '').toLowerCase();
+      if (h.includes('мг') || n > 10) return n;
+      return Math.round(n * 1000);
+    };
+
+    const rows = parseCSV(csv);
+    if (!rows.length) return res.status(400).json({ success: false, error: 'CSV is empty' });
+    const headers = rows[0].map(h => String(h || '').trim());
+    const getIndex = (...aliases) => headers.findIndex(h => {
+      const low = h.toLowerCase();
+      return aliases.some(a => low.includes(a));
+    });
+
+    const idx = {
+      animal: getIndex('вид живот', 'собак', 'кош'),
+      category: getIndex('категор'),
+      purpose: getIndex('назначен'),
+      type: getIndex('тип корма', 'тип'),
+      brand: getIndex('бренд'),
+      name: getIndex('назв', 'корм'),
+      me100g: getIndex('мэ', 'ккал/100'),
+      moisture: getIndex('влага', 'влажн'),
+      protein: getIndex('белок'),
+      fat: getIndex('жир'),
+      carbs: getIndex('перев.углев', 'углев'),
+      fiber: getIndex('пищ.волок', 'клетчат'),
+      ash: getIndex('зола'),
+      calcium: getIndex('кальц'),
+      phosphorus: getIndex('фосфор'),
+      ingredients: getIndex('ингредиент', 'состав')
+    };
+
+    const db = getDatabase();
+    db.serialize(() => {
+      const stmt = db.prepare(`
+        INSERT INTO feeds (name, brand, type, animal_type, category, metabolic_energy, protein, fat, carbohydrates, fiber, ash, moisture, calcium, phosphorus, vitamin_a, vitamin_d, ingredients)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      let imported = 0;
+      for (let r = 1; r < rows.length; r++) {
+        const row = rows[r];
+        if (!row || row.length === 0) continue;
+        const name = row[idx.name] || '';
+        const brand = row[idx.brand] || '';
+        if (!String(name).trim()) continue;
+
+        const animal_type = mapAnimal(row[idx.animal]);
+        const type = mapType(row[idx.type]);
+
+        // Нормализация категории из назначения
+        let category = 'adult';
+        const categoryRaw = String(row[idx.category] || row[idx.purpose] || '').toLowerCase();
+        if (categoryRaw.includes('щен') || categoryRaw.includes('юниор') || categoryRaw.includes('котен')) category = 'puppy';
+        else if (categoryRaw.includes('пожил') || categoryRaw.includes('senior')) category = 'senior';
+        else if (categoryRaw.includes('вес') || categoryRaw.includes('похуд') || categoryRaw.includes('weight')) category = 'weight_loss';
+        else if (categoryRaw.includes('диет') || categoryRaw.includes('therap') || categoryRaw.includes('терап')) category = 'diet';
+
+        // В таблице МЭ на 100г → переводим в ккал/кг
+        const me100g = toNumber(row[idx.me100g]);
+        const metabolic_energy = Math.round(me100g * 10); // 100г -> кг
+
+        const protein = toNumber(row[idx.protein]);
+        const fat = toNumber(row[idx.fat]);
+        const fiber = toNumber(row[idx.fiber]);
+        const ash = toNumber(row[idx.ash]);
+        const moisture = toNumber(row[idx.moisture]);
+        let carbohydrates = toNumber(row[idx.carbs]);
+        if (!carbohydrates) {
+          carbohydrates = Math.max(0, 100 - (protein + fat + fiber + ash + moisture));
+        }
+
+        const calcium = normalizeCaP(row[idx.calcium], headers[idx.calcium]);
+        const phosphorus = normalizeCaP(row[idx.phosphorus], headers[idx.phosphorus]);
+        const ingredients = String(row[idx.ingredients] || '');
+
+        stmt.run([
+          String(name).trim(), String(brand).trim(), type, animal_type, category,
+          metabolic_energy, protein, fat, carbohydrates, fiber, ash, moisture,
+          calcium, phosphorus, 0, 0, ingredients
+        ]);
+        imported++;
+      }
+      stmt.finalize((err) => {
+        if (err) return res.status(500).json({ success: false, error: 'DB finalize error' });
+        res.json({ success: true, imported });
+      });
+    });
+  } catch (e) {
+    console.error('Local CSV import error:', e);
+    res.status(500).json({ success: false, error: 'Failed import from local CSV' });
+  }
+});
+
+// === Импорт из Google Sheets (публичный лист) ===
+// POST /feeds/import/google { url: string }
+router.post('/import/google', (req, res) => {
+  ensureDbInitialized();
+  try {
+    const { url } = req.body || {};
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ success: false, error: 'Google Sheets URL is required' });
+    }
+
+    // Преобразуем ссылку /edit?... -> /export?format=csv
+    let exportUrl = url;
+    if (exportUrl.includes('/edit')) {
+      exportUrl = exportUrl.split('/edit')[0] + '/export?format=csv';
+    } else if (!exportUrl.includes('/export')) {
+      exportUrl = exportUrl + (exportUrl.includes('?') ? '&' : '?') + 'export=download&format=csv';
+    }
+
+    const fetchCSV = (csvUrl) => new Promise((resolve, reject) => {
+      https.get(csvUrl, (resp) => {
+        if (resp.statusCode && resp.statusCode >= 300 && resp.statusCode < 400 && resp.headers.location) {
+          // redirect
+          return resolve(fetchCSV(resp.headers.location));
+        }
+        let data = '';
+        resp.on('data', (chunk) => data += chunk);
+        resp.on('end', () => resolve(data));
+      }).on('error', reject);
+    });
+
+    const parseCSV = (text) => {
+      // Простой CSV-парсер с поддержкой кавычек
+      const rows = [];
+      let i = 0, field = '', row = [], inQuotes = false;
+      while (i < text.length) {
+        const c = text[i];
+        if (inQuotes) {
+          if (c === '"') {
+            if (text[i+1] === '"') { field += '"'; i++; } else { inQuotes = false; }
+          } else { field += c; }
+        } else {
+          if (c === '"') { inQuotes = true; }
+          else if (c === ',') { row.push(field); field=''; }
+          else if (c === '\n') { row.push(field); rows.push(row); row=[]; field=''; }
+          else if (c === '\r') { /* skip */ }
+          else { field += c; }
+        }
+        i++;
+      }
+      if (field.length || row.length) { row.push(field); rows.push(row); }
+      return rows;
+    };
+
+    const toNumber = (v) => {
+      if (v === undefined || v === null) return 0;
+      if (typeof v === 'number') return v;
+      const s = String(v).replace(/[^0-9,\.\-]/g, '').replace(',', '.');
+      const n = parseFloat(s);
+      return Number.isFinite(n) ? n : 0;
+    };
+
+    const mapType = (v) => {
+      const s = String(v || '').toLowerCase();
+      if (s.includes('сух')) return 'dry';
+      if (s.includes('влаж')) return 'wet';
+      if (s.includes('лаком') || s.includes('дополн') || s.includes('treat')) return 'treats';
+      return 'dry';
+    };
+
+    const mapAnimal = (v) => {
+      const s = String(v || '').toLowerCase();
+      if (s.includes('кош')) return 'cat';
+      if (s.includes('соб')) return 'dog';
+      if (s.includes('both') || s.includes('оба')) return 'both';
+      return 'dog';
+    };
+
+    const normalizeCaP = (value, header) => {
+      // Приводим Ca/P к мг/100г. Если значение похоже на проценты (<= 5), умножаем на 1000
+      const n = toNumber(value);
+      const h = String(header || '').toLowerCase();
+      if (h.includes('мг') || n > 10) return n; // уже мг/100г
+      return Math.round(n * 1000); // из % в мг/100г
+    };
+
+    fetchCSV(exportUrl)
+      .then(csv => {
+        const rows = parseCSV(csv);
+        if (!rows.length) throw new Error('Empty sheet');
+        const headers = rows[0].map(h => String(h || '').trim());
+        const getIndex = (...aliases) => headers.findIndex(h => {
+          const low = h.toLowerCase();
+          return aliases.some(a => low.includes(a));
+        });
+
+        const idx = {
+          name: getIndex('назв', 'name'),
+          brand: getIndex('бренд', 'торгов'),
+          type: getIndex('тип'),
+          animal: getIndex('собак', 'кош', 'вид живот'),
+          category: getIndex('категор', 'назначен', 'возраст'),
+          me: getIndex('мэ', 'ккал/кг', 'энерг'),
+          protein: getIndex('белок'),
+          fat: getIndex('жир'),
+          fiber: getIndex('клетчат'),
+          ash: getIndex('зола'),
+          moisture: getIndex('влажн'),
+          calcium: getIndex('кальц'),
+          phosphorus: getIndex('фосфор'),
+          vitamin_a: getIndex('витамин а', 'vitamin a'),
+          vitamin_d3: getIndex('витамин d', 'vitamin d'),
+          ingredients: getIndex('ингредиент', 'состав')
+        };
+
+        const db = getDatabase();
+        db.serialize(() => {
+          let imported = 0;
+          const upsert = db.prepare(`
+            INSERT INTO feeds (name, brand, type, animal_type, category, metabolic_energy, protein, fat, carbohydrates, fiber, ash, moisture, calcium, phosphorus, vitamin_a, vitamin_d, ingredients)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `);
+
+          for (let r = 1; r < rows.length; r++) {
+            const row = rows[r];
+            if (!row || row.length === 0) continue;
+            const name = row[idx.name] || '';
+            const brand = row[idx.brand] || '';
+            if (!String(name).trim()) continue;
+
+            const type = mapType(row[idx.type]);
+            const animal_type = mapAnimal(row[idx.animal]);
+            const categoryRaw = String(row[idx.category] || '').toLowerCase();
+            // Нормализуем категорию для таблицы feeds (life_stage)
+            let category = 'adult';
+            if (categoryRaw.includes('щен') || categoryRaw.includes('котен')) category = 'puppy';
+            else if (categoryRaw.includes('пожил') || categoryRaw.includes('senior')) category = 'senior';
+            else if (categoryRaw.includes('вес') || categoryRaw.includes('похуд') || categoryRaw.includes('weight')) category = 'weight_loss';
+            else if (categoryRaw.includes('диет') || categoryRaw.includes('therap')) category = 'diet';
+
+            const me = toNumber(row[idx.me]);
+            const protein = toNumber(row[idx.protein]);
+            const fat = toNumber(row[idx.fat]);
+            const fiber = toNumber(row[idx.fiber]);
+            const ash = toNumber(row[idx.ash]);
+            const moisture = toNumber(row[idx.moisture]);
+            let carbohydrates = 0;
+            if (protein || fat || fiber || ash || moisture) {
+              carbohydrates = Math.max(0, 100 - (protein + fat + fiber + ash + moisture));
+            }
+            const calcium = normalizeCaP(row[idx.calcium], headers[idx.calcium]);
+            const phosphorus = normalizeCaP(row[idx.phosphorus], headers[idx.phosphorus]);
+            const vitamin_a = toNumber(row[idx.vitamin_a]);
+            const vitamin_d = toNumber(row[idx.vitamin_d3]);
+            const ingredients = String(row[idx.ingredients] || '');
+
+            upsert.run([
+              String(name).trim(), String(brand).trim(), type, animal_type, category,
+              me, protein, fat, carbohydrates, fiber, ash, moisture, calcium, phosphorus,
+              vitamin_a, vitamin_d, ingredients
+            ]);
+            imported++;
+          }
+
+          upsert.finalize((err) => {
+            if (err) {
+              console.error('Upsert finalize error:', err);
+              return res.status(500).json({ success: false, error: 'DB error on import' });
+            }
+            res.json({ success: true, imported });
+          });
+        });
+      })
+      .catch((err) => {
+        console.error('Google import error:', err);
+        res.status(500).json({ success: false, error: 'Failed to import from Google Sheets' });
+      });
+  } catch (error) {
+    console.error('Error in /import/google:', error);
+    res.status(500).json({ success: false, error: 'Unexpected server error' });
   }
 });
 
